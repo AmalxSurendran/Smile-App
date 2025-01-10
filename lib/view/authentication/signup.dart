@@ -96,7 +96,7 @@ class SignupScreen extends StatelessWidget {
                       kHeight(0.04),
                       Apputili().customButton(
                         onPressed: () {
-                          Get.back();
+                          controller.signUp();
                         },
                         text: 'Sign Up', // Optional text
                       ),

@@ -1,9 +1,9 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:smile_x_doctor_app/utils/apputili.dart';
 import 'package:smile_x_doctor_app/utils/routes/app_routes.dart';
-
 import '../../utils/colors.dart';
 import '../../utils/const.dart';
 import '../../controller/authentication/login_controller.dart';
@@ -105,7 +105,12 @@ class LoginScreen extends StatelessWidget {
                     onPressed: () {
                       loginController.login();
                     },
-                    text: 'Login', // Optional text
+                    text: loginController.isLoading.value
+                        ? '' // No text when loading
+                        : 'Login', // Button text when not loading
+                    child: loginController.isLoading.value
+                        ? const CupertinoActivityIndicator() // Show activity indicator
+                        : null, // No child when not loading
                   ),
 
                   kHeight(0.01),

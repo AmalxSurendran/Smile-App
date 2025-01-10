@@ -19,6 +19,7 @@ class ProfileController extends GetxController {
   var doctorDetailsList = <String>[].obs;
   void fetchProfile(String doctorId) async {
     try {
+      log('doctprs id in fetchprofile: $doctorId');
       var response = await DioHandler.dioGET(endpoint: 'doctors/$doctorId');
       log('Raw Response: $response');
 

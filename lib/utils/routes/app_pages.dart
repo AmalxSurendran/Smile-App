@@ -3,6 +3,7 @@ import 'package:smile_x_doctor_app/view/authentication/login.dart';
 import 'package:smile_x_doctor_app/view/authentication/signup.dart';
 import 'package:smile_x_doctor_app/view/casesubmission.dart';
 import 'package:smile_x_doctor_app/view/profile/account.dart';
+import 'package:smile_x_doctor_app/view/profile/add_clinic.dart';
 import 'package:smile_x_doctor_app/view/profile/profile.dart';
 import '../../view/home_screen.dart';
 import '../../view/splash_screen.dart';
@@ -49,13 +50,19 @@ class AppPages {
     ),
     GetPage(
       name: AppRoutes.account,
-      page: () => AccountScreen(),
+      page: () => const AccountScreen(),
       transition: Transition.cupertino,
       transitionDuration: const Duration(milliseconds: 400),
     ),
     GetPage(
       name: AppRoutes.signup,
-      page: () => SignupScreen(),
+      page: () => const SignupScreen(),
+      transition: Transition.cupertino,
+      transitionDuration: const Duration(milliseconds: 400),
+    ),
+    GetPage(
+      name: AppRoutes.AddClinic,
+      page: () => const AddClinic(),
       transition: Transition.cupertino,
       transitionDuration: const Duration(milliseconds: 400),
     ),

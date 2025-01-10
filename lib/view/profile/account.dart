@@ -60,7 +60,7 @@ class AccountScreen extends StatelessWidget {
                 isEditing: controller.isEditing.value,
               ),
             ),
-            SizedBox(height: 16),
+            const SizedBox(height: 16),
             Obx(
               () => _buildTextField(
                 controller: controller.mobileController,
@@ -68,7 +68,7 @@ class AccountScreen extends StatelessWidget {
                 isEditing: controller.isEditing.value,
               ),
             ),
-            SizedBox(height: 16),
+            const SizedBox(height: 16),
             // The email field is always read-only (fixed value)
             _buildTextField(
               controller: controller.emailController,

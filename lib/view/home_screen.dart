@@ -4,8 +4,12 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:smile_x_doctor_app/controller/clinic_controller.dart';
 import 'package:smile_x_doctor_app/controller/home_controller.dart';
+import 'package:smile_x_doctor_app/controller/patient_list_controller.dart';
 import 'package:smile_x_doctor_app/controller/profile_controller.dart';
+import 'package:smile_x_doctor_app/utils/apputili.dart';
 import 'package:smile_x_doctor_app/utils/colors.dart';
 import 'package:smile_x_doctor_app/utils/routes/app_routes.dart';
 import '../utils/const.dart';
@@ -13,7 +17,12 @@ import '../utils/custom_text_widget.dart';
 
 class HomeScreen extends StatelessWidget {
   HomeScreen({super.key});
+
+  // Controllers initialized once
   final HomeController controller = Get.put(HomeController());
+  final ProfileController profileController = Get.put(ProfileController());
+  final ClinicController clinicController = Get.put(ClinicController());
+  final Pcontroller = Get.put(PatientsListController());
   // List of common Malayalam names
   final List<String> malayaliNames = [
     "Ajay Kumar",
@@ -28,7 +37,7 @@ class HomeScreen extends StatelessWidget {
     "Sindhu Rajan"
   ];
 
-  // Function to generate dummy data with random Malayalam names and custom image URLs based on names
+  // Function to generate dummy data with random Malayalam names and custom image URLs
   List<Map<String, String>> generateDummyData(
       List<String> nameList, String type) {
     final random = Random();
@@ -41,55 +50,53 @@ class HomeScreen extends StatelessWidget {
           return {
             "name": randomName,
             "phone": "98987678${index + 1}",
-            "image": imageUrl,
+            "image": imageUrl
           };
         case 'appointments':
           return {
             "name": randomName,
             "appointmentDate": "23.Dec.2024",
             "timeAgo": "${(index + 1) * 5} min ago",
-            "image": imageUrl,
+            "image": imageUrl
           };
-        case 'caseSubmit':
-          return {
-            "name": randomName,
-            "phone": "98987678${index + 1}",
-            "image": imageUrl,
-          };
+
         default:
           return {};
       }
     });
   }
 
-  // Function to generate a unique image URL based on the name (for demo purposes)
+  // Function to generate a unique image URL based on the name
   String _generateImageUrl(String name) {
-    // Here we generate an avatar or image based on the initials of the name
     final initials = name.split(" ").map((word) => word[0]).take(2).join();
     return 'https://ui-avatars.com/api/?name=$initials&background=random&color=fff&size=128'; // Custom avatar URL
   }
 
   @override
   Widget build(BuildContext context) {
+    final doctorDetailsList = Get.arguments as List<String>? ?? [];
+
+    if (doctorDetailsList.isNotEmpty &&
+        profileController.doctorInitials.value.isEmpty) {
+      profileController.fetchProfile(doctorDetailsList[0]);
+    }
+
     // Generate dummy data
     final patientsData = generateDummyData(malayaliNames, 'patients');
     final appointmentsData = generateDummyData(malayaliNames, 'appointments');
-    final caseSubmitData = generateDummyData(malayaliNames, 'caseSubmit');
+
     return WillPopScope(
       onWillPop: () async {
-        // Handle back button press
-        bool shouldPop = await controller.showExitConfirmationDialog(context);
-        return shouldPop;
+        return await controller.showExitConfirmationDialog(context);
       },
       child: DefaultTabController(
-        length: 3, // Number of tabs
+        length: 2, // Number of tabs
         child: Scaffold(
           body: SafeArea(
             child: Padding(
-              padding: EdgeInsets.only(
-                left: screenWidth * 0.05,
-                right: screenWidth * 0.05,
-                top: screenHeight * 0.05,
+              padding: EdgeInsets.symmetric(
+                horizontal: screenWidth * 0.05,
+                vertical: screenHeight * 0.05,
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -106,9 +113,11 @@ class HomeScreen extends StatelessWidget {
                             fontWeight: FontWeight.w400,
                             color: AppColors.secondary,
                           ),
-                          const CustomTextWidget(
-                            title: "Dr. Nisha Paul",
-                          ),
+                          doctorDetailsList.isEmpty
+                              ? const Text('No doctor details found')
+                              : CustomTextWidget(
+                                  title:
+                                      'Welcome, Dr. ${doctorDetailsList[1]}'),
                         ],
                       ),
                       const Spacer(),
@@ -124,51 +133,35 @@ class HomeScreen extends StatelessWidget {
                       kWidth(0.05),
                       GestureDetector(
                         onTap: () {
-                          final pcontroller = Get.put(ProfileController());
-                          pcontroller.fetchProfile('DR1001');
+                          profileController.fetchProfile(doctorDetailsList[0]);
                           Get.toNamed(AppRoutes.profile);
-                          // Show a dialog when the avatar is tapped
-                          // showDialog(
-                          //   context: context,
-                          //   builder: (BuildContext context) {
-                          //     return AlertDialog(
-                          //       title: const Text("Logout"),
-                          //       content: const Text(
-                          //           "Are you sure you want to logout?"),
-                          //       actions: [
-                          //         TextButton(
-                          //           onPressed: () {
-                          //             Navigator.pop(
-                          //                 context); // Close the dialog
-                          //           },
-                          //           child:
-                          //               const CustomTextWidget(title: "Cancel"),
-                          //         ),
-                          //         TextButton(
-                          //           onPressed: () {
-                          //             // Perform logout operation here
-                          //             Get.offNamed("/login");
-                          //             // Add logout logic here
-                          //           },
-                          //           child:
-                          //               const CustomTextWidget(title: "Logout"),
-                          //         ),
-                          //       ],
-                          //     );
-                          //   },
-                          // );
                         },
-                        child: CircleAvatar(
-                          backgroundColor: AppColors.lightGray,
-                          radius: screenWidth8,
-                          backgroundImage:
-                              const AssetImage("assets/images/splash.jpeg"),
-                        ),
-                      )
+                        child: Obx(() {
+                          return CircleAvatar(
+                            radius: screenWidth * 0.07,
+                            backgroundColor: Colors.blue,
+                            child: Text(
+                              profileController.doctorInitials.value.isEmpty
+                                  ? 'XX'
+                                  : profileController.doctorInitials.value,
+                              style: GoogleFonts.poppins(
+                                fontSize: screenHeight * 0.02,
+                                fontWeight: FontWeight.w600,
+                                color: Colors.white,
+                              ),
+                            ),
+                          );
+                        }),
+                      ),
                     ],
                   ),
                   kHeight(0.03),
-
+                  Apputili().buildDropdown(
+                    hintText: "Select Clinic",
+                    controller: clinicController,
+                    patientsController: Pcontroller,
+                  ),
+                  kHeight(0.03),
                   // Tab Bar Section
                   Container(
                     height: screenHeight * 0.07,
@@ -177,8 +170,9 @@ class HomeScreen extends StatelessWidget {
                       borderRadius: BorderRadius.circular(10),
                     ),
                     child: TabBar(
-                      labelPadding:
-                          EdgeInsets.symmetric(horizontal: screenWidth1),
+                      labelPadding: EdgeInsets.symmetric(
+                        horizontal: screenWidth1,
+                      ),
                       dividerColor: Colors.transparent,
                       padding: EdgeInsets.all(screenWidth2),
                       onTap: (index) {
@@ -193,7 +187,6 @@ class HomeScreen extends StatelessWidget {
                       tabs: [
                         buildTab(0, "Patients"),
                         buildTab(1, "Appointments"),
-                        buildTab(2, "Case Submit"),
                       ],
                     ),
                   ),
@@ -233,31 +226,20 @@ class HomeScreen extends StatelessWidget {
                     child: TabBarView(
                       physics: const NeverScrollableScrollPhysics(),
                       children: [
-                        // Tab 1 Content: Patients List
                         _buildListView(
-                          patientsData,
-                          (item) => [
-                            CustomTextWidget(title: item["name"]!),
-                            CustomTextWidget(title: item["phone"]!),
-                          ],
-                        ),
-                        // Tab 2 Content: Appointments List
+                            patientsData,
+                            (item) => [
+                                  CustomTextWidget(title: item["name"]!),
+                                  CustomTextWidget(title: item["phone"]!),
+                                ]),
                         _buildListView(
-                          appointmentsData,
-                          (item) => [
-                            CustomTextWidget(title: item["name"]!),
-                            CustomTextWidget(title: item["appointmentDate"]!),
-                            CustomTextWidget(title: item["timeAgo"]!),
-                          ],
-                        ),
-                        // Tab 3 Content: Case Submit List
-                        _buildListView(
-                          caseSubmitData,
-                          (item) => [
-                            CustomTextWidget(title: item["name"]!),
-                            CustomTextWidget(title: item["phone"]!),
-                          ],
-                        ),
+                            appointmentsData,
+                            (item) => [
+                                  CustomTextWidget(title: item["name"]!),
+                                  CustomTextWidget(
+                                      title: item["appointmentDate"]!),
+                                  CustomTextWidget(title: item["timeAgo"]!),
+                                ]),
                       ],
                     ),
                   ),
@@ -271,10 +253,8 @@ class HomeScreen extends StatelessWidget {
   }
 
   // Function to build ListView for a tab
-  ListView _buildListView(
-    List<Map<String, String>> data,
-    List<Widget> Function(Map<String, String> item) itemBuilder,
-  ) {
+  ListView _buildListView(List<Map<String, String>> data,
+      List<Widget> Function(Map<String, String> item) itemBuilder) {
     return ListView.builder(
       itemCount: data.length,
       itemBuilder: (context, index) {
@@ -288,30 +268,25 @@ class HomeScreen extends StatelessWidget {
           ),
           child: Row(
             children: [
-              // Display image
               CircleAvatar(
                 backgroundColor: AppColors.lightGray,
                 onBackgroundImageError: (_, __) {
-                  // Fallback to local image in case of error
                   const AssetImage("assets/images/splash.jpeg");
                 },
                 backgroundImage:
                     item["image"] != null && item["image"]!.isNotEmpty
-                        ? NetworkImage(
-                            item["image"]!) // Use network image if available
+                        ? NetworkImage(item["image"]!)
                         : const AssetImage("assets/images/splash.jpeg"),
-                radius: screenWidth8, // Adjust size as needed
+                radius: screenWidth8,
               ),
               kWidth(0.02),
               Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: itemBuilder(item),
-                ),
-              ),
+                  child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: itemBuilder(item))),
               const Icon(
                 Icons.arrow_forward_ios_rounded,
-                color: AppColors.contents,
+                color: AppColors.greyShade,
               ),
             ],
           ),
@@ -320,6 +295,7 @@ class HomeScreen extends StatelessWidget {
     );
   }
 
+  // Function to build a tab for the TabBar
   Obx buildTab(int index, String title) {
     return Obx(
       () {
@@ -340,7 +316,7 @@ class HomeScreen extends StatelessWidget {
                 color: controller.currentIndex.value == index
                     ? AppColors.primary
                     : AppColors.contents,
-                fontSize: screenHeight * 0.014,
+                fontSize: screenHeight * 0.018,
               ),
             ),
           ),

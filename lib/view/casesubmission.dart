@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:smile_x_doctor_app/utils/apputili.dart';
 import 'package:smile_x_doctor_app/utils/colors.dart';
 import 'package:smile_x_doctor_app/utils/const.dart';
 
@@ -9,156 +9,83 @@ class CaseSubmission extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final List<String> options =
-        List<String>.generate(100, (index) => (index + 1).toString());
-    String? selectedValue;
+    final List<String> ageOptions =
+        List.generate(100, (index) => (index + 1).toString());
+    String? selectedAge;
 
     return Scaffold(
-      appBar: _buildAppBar(context),
-      body: SafeArea(
-        child: SingleChildScrollView(
-          child: Padding(
-            padding: EdgeInsets.symmetric(
-                horizontal:
-                    screenWidth6), // Replaced hardcoded padding with scaled value
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                kHeight(0.02),
-                _buildTitle(context, title: 'Patient Names'),
-                kHeight(0.01),
-                _buildTextField('Enter patient name'),
-                kHeight(0.01),
-                _buildTitle(context, title: 'Patient Age'),
-                kHeight(0.01),
-                _buildDropdown(options, selectedValue),
-                kHeight(0.01),
-                _buildTitle(context, title: 'Chief Complaint'),
-                kHeight(0.01),
-                _buildComplaintContainer('Enter complaint'),
-                kHeight(0.01),
-                _buildTitle(context, title: 'Treatment Goals'),
-                kHeight(0.01),
-                _buildComplaintContainer('Enter treatment goals'),
-                kHeight(0.01),
-                _buildTitle(context, title: 'Upload Photos'),
-                kHeight(0.02),
-                _buildImageUpload(),
-                kHeight(0.01),
-                _buildTitle(context, title: 'Upload OPG'),
-                kHeight(0.01),
-                _buildTextField('Upload here'),
-                kHeight(0.01),
-                _buildTitle(context, title: 'Upload Documents'),
-                kHeight(0.01),
-                _buildTextField('Upload here'),
-                kHeight(0.03),
-              ],
+      appBar: AppBar(
+        title: Text(
+          'Case Submission',
+          style: GoogleFonts.poppins(
+            fontSize: screenHeight * 0.027,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+      ),
+      body: SingleChildScrollView(
+        padding: EdgeInsets.symmetric(
+          horizontal: screenWidth * 0.05,
+          vertical: screenHeight * 0.05,
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _buildSectionTitle(context, 'Patient Name'),
+            kHeight(0.01),
+            Apputili().buildTextField(hintText: 'Enter patient name'),
+            kHeight(0.02),
+            _buildSectionTitle(context, 'Patient Age'),
+            kHeight(0.01),
+            _buildDropdown(ageOptions, selectedAge),
+            kHeight(0.02),
+            _buildSectionTitle(context, 'Chief Complaint'),
+            kHeight(0.01),
+            _buildLargeTextField('Enter Chief Complaint'),
+            kHeight(0.02),
+            _buildSectionTitle(context, 'Treatment Goals'),
+            kHeight(0.01),
+            _buildLargeTextField('Enter Treatment Goals'),
+            kHeight(0.02),
+            _buildSectionTitle(context, 'Upload Photos'),
+            kHeight(0.01),
+            _buildImageUploadRow(),
+            kHeight(0.02),
+            _buildSectionTitle(context, 'Upload OPG'),
+            kHeight(0.01),
+            _buildUploadContainer(icon: Icons.upload_file_outlined),
+            kHeight(0.02),
+            _buildSectionTitle(context, 'Upload Documents'),
+            kHeight(0.01),
+            _buildUploadContainer(icon: Icons.upload_file_outlined),
+            kHeight(0.04),
+            Apputili().customButton(
+              text: 'Save',
+              onPressed: () {
+                // Implement save functionality
+              },
             ),
-          ),
+          ],
         ),
       ),
     );
   }
 
-  // AppBar
-  AppBar _buildAppBar(BuildContext context) {
-    return AppBar(
-      automaticallyImplyLeading: false,
-      leading: _buildBackButton(),
-      title: _buildTitle(context, title: 'Case Submission'),
-      centerTitle: false,
-      actions: [_buildProfileAvatar()],
-    );
-  }
-
-  // Back button
-  Widget _buildBackButton() {
-    return Padding(
-      padding: EdgeInsets.only(
-          left: screenWidth6), // Replaced hardcoded padding with scaled value
-      child: GestureDetector(
-        onTap: () => Get.back(),
-        child: Container(
-          height: screenWidth8,
-          width: screenWidth8,
-          decoration: const BoxDecoration(
-            shape: BoxShape.circle,
-            color: AppColors.lightGray,
-          ),
-          child: Icon(
-            Icons.arrow_back_ios_new,
-            size: screenHeight2, // Replaced hardcoded size with scaled value
-          ),
-        ),
-      ),
-    );
-  }
-
-  // Profile avatar
-  Widget _buildProfileAvatar() {
-    return Padding(
-      padding: EdgeInsets.only(
-          right: screenWidth6), // Replaced hardcoded padding with scaled value
-      child: GestureDetector(
-        onTap: () {},
-        child: CircleAvatar(
-          radius: screenWidth5, // Replaced hardcoded radius with scaled value
-          backgroundImage: const AssetImage("assets/images/splash.jpeg"),
-        ),
-      ),
-    );
-  }
-
-  // Title text widget
-  Widget _buildTitle(BuildContext context,
-      {required String title,
-      double? fontSize,
-      FontWeight? fontWeight,
-      Color? color}) {
+  // Section Title
+  Widget _buildSectionTitle(BuildContext context, String title) {
     return Text(
       title,
       style: GoogleFonts.poppins(
         textStyle: Theme.of(context).textTheme.bodyLarge?.copyWith(
-              fontSize: fontSize ??
-                  screenHeight *
-                      0.018, // Replaced hardcoded font size with scaled value
-              fontWeight: fontWeight ?? FontWeight.w500,
-              color: color ?? Colors.black,
+              fontSize: screenHeight * 0.02,
+              fontWeight: FontWeight.w500,
+              color: Colors.black,
             ),
       ),
     );
   }
 
-  // TextField widget
-  Widget _buildTextField(String hintText) {
-    return TextField(
-      decoration: InputDecoration(
-        hintText: hintText,
-        hintStyle: GoogleFonts.poppins(
-          fontSize: screenHeight *
-              0.016, // Replaced hardcoded font size with scaled value
-          fontWeight: FontWeight.w400,
-          color: AppColors.darkGray,
-        ),
-        filled: true,
-        fillColor: AppColors.lightGray,
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(
-              screenWidth5), // Replaced hardcoded value with scaled value
-          borderSide: BorderSide.none,
-        ),
-        contentPadding: EdgeInsets.symmetric(
-          vertical: screenHeight *
-              0.02, // Replaced hardcoded vertical padding with scaled value
-          horizontal: screenWidth *
-              0.05, // Replaced hardcoded horizontal padding with scaled value
-        ),
-      ),
-    );
-  }
-
-  // Dropdown widget
+  // Dropdown Widget
   Widget _buildDropdown(List<String> options, String? selectedValue) {
     return SizedBox(
       width: screenWidth10 * 3,
@@ -169,28 +96,27 @@ class CaseSubmission extends StatelessWidget {
         decoration: InputDecoration(
           hintText: 'Age',
           hintStyle: GoogleFonts.poppins(
-            fontSize: screenHeight * 0.016, // Replaced with scaled value
+            fontSize: screenHeight * 0.016,
             fontWeight: FontWeight.w400,
             color: AppColors.darkGray,
           ),
           filled: true,
           fillColor: AppColors.lightGray,
           border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(
-                screenWidth5), // Replaced with scaled value
+            borderRadius: BorderRadius.circular(12),
             borderSide: BorderSide.none,
           ),
         ),
         dropdownColor: Colors.white,
         style: GoogleFonts.poppins(
-          fontSize: screenHeight * 0.016, // Replaced with scaled value
+          fontSize: screenHeight * 0.016,
           fontWeight: FontWeight.w400,
           color: AppColors.darkGray,
         ),
         icon: Icon(
           Icons.keyboard_arrow_down,
           color: AppColors.darkGray,
-          size: screenHeight2, // Replaced with scaled value
+          size: screenHeight2,
         ),
         onChanged: (newValue) {
           selectedValue = newValue;
@@ -198,67 +124,43 @@ class CaseSubmission extends StatelessWidget {
         items: options.map<DropdownMenuItem<String>>((String value) {
           return DropdownMenuItem<String>(
             value: value,
-            child: Center(
-              child: Text(
-                value,
-                textAlign: TextAlign.center,
-                style: GoogleFonts.poppins(
-                  fontSize: screenHeight * 0.016, // Replaced with scaled value
-                  fontWeight: FontWeight.w400,
-                  color: AppColors.darkGray,
-                ),
-              ),
-            ),
+            child: Text(value, textAlign: TextAlign.center),
           );
         }).toList(),
       ),
     );
   }
 
-  // Complaint container widget
-  Widget _buildComplaintContainer(String hintText) {
+  // Large Text Field Container
+  Widget _buildLargeTextField(String hintText) {
     return Container(
       height: screenHeight * 0.2,
       width: double.infinity,
       decoration: BoxDecoration(
-          color: AppColors.lightGray,
-          borderRadius: BorderRadius.circular(screenWidth5)),
+        color: AppColors.lightGray,
+        borderRadius: BorderRadius.circular(screenWidth5),
+      ),
       padding: EdgeInsets.symmetric(
         vertical: screenHeight * 0.01,
       ),
-      child: TextField(
-        maxLines: null,
-        decoration: InputDecoration(
-          hintText: hintText,
-          hintStyle: GoogleFonts.poppins(
-            fontSize: screenHeight * 0.016, // Scaled value
-            fontWeight: FontWeight.w400,
-            color: AppColors.darkGray,
-          ),
-          filled: true,
-          fillColor: AppColors.lightGray,
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(screenWidth5), // Scaled value
-            borderSide: BorderSide.none,
-          ),
-          contentPadding: EdgeInsets.symmetric(
-            vertical: screenHeight * 0.02, // Scaled value
-            horizontal: screenWidth * 0.05, // Scaled value
-          ),
-        ),
-      ),
+      child: Apputili().buildTextField(hintText: hintText),
     );
   }
 
-  // Image upload container
-  Widget _buildImageUpload() {
+  // Image Upload Row
+  // Image Upload Row
+  Widget _buildImageUploadRow() {
     return SingleChildScrollView(
       scrollDirection: Axis.horizontal,
       child: Row(
         children: List.generate(6, (index) {
           return Padding(
-            padding: EdgeInsets.symmetric(
-                horizontal: screenWidth10 * 0.09), // Replaced with scaled value
+            padding: EdgeInsets.only(
+              left: screenWidth * 0.02, // Padding on the left
+              right: index == 5
+                  ? 0
+                  : screenWidth * 0.02, // No right padding for the last item
+            ),
             child: _buildImageContainer(),
           );
         }),
@@ -266,23 +168,41 @@ class CaseSubmission extends StatelessWidget {
     );
   }
 
-  // Image container widget
+  // Image Container
   Widget _buildImageContainer() {
     return Container(
-      height: screenHeight10, // Replaced with scaled value
-      width: screenWidth * 0.4, // Replaced with scaled value
+      height: screenHeight * 0.16,
+      width: screenWidth * 0.4,
       decoration: BoxDecoration(
         color: AppColors.lightGray,
-        borderRadius:
-            BorderRadius.circular(screenWidth5), // Replaced with scaled value
-        border: Border.all(
-          // ignore: deprecated_member_use
-          color: AppColors.darkGray.withOpacity(0.1),
-        ),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: AppColors.darkGray.withOpacity(0.1)),
       ),
       child: const Icon(
         Icons.image_outlined,
         color: AppColors.darkGray,
+      ),
+    );
+  }
+
+  // Upload Container
+  Widget _buildUploadContainer({required IconData icon, VoidCallback? onTap}) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        height: screenHeight * 0.16,
+        width: double.infinity,
+        decoration: BoxDecoration(
+          color: AppColors.lightGray,
+          borderRadius: BorderRadius.circular(screenWidth5),
+        ),
+        child: Center(
+          child: Icon(
+            icon,
+            size: screenHeight * 0.05,
+            color: AppColors.greyShade.withOpacity(.5),
+          ),
+        ),
       ),
     );
   }

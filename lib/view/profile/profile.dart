@@ -108,6 +108,13 @@ class Profile extends StatelessWidget {
                     },
                   ),
                   _buildProfileOption(
+                    icon: Icons.local_hospital,
+                    title: 'Create Clinic',
+                    onTap: () {
+                      Get.toNamed(AppRoutes.AddClinic);
+                    },
+                  ),
+                  _buildProfileOption(
                     icon: Icons.notifications,
                     title: 'Notifications',
                     onTap: () {},

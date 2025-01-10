@@ -3,9 +3,11 @@ import 'package:dio/dio.dart';
 
 class DioHandler {
   static final Dio dio = Dio();
-  static const String baseUrl =
+  // static const String baseUrl =
+  //     "https://liveweare.com/newdemo/smileexcelnew/api/doctorapp/";
+  static const String baseUrl2 =
       "https://liveweare.com/newdemo/smileexcelnew/api/doctorapp/";
-  static const String baseUrl2 = "http://192.168.1.61:8000/api/doctorapp/";
+
 //post method
   static Future<dynamic> dioPOST({
     required String endpoint,
@@ -37,7 +39,7 @@ class DioHandler {
   static Future<dynamic> dioGET({required String endpoint}) async {
     try {
       final dio = Dio();
-      final response = await dio.get('$baseUrl$endpoint');
+      final response = await dio.get('$baseUrl2$endpoint');
       return response.data;
     } catch (e) {
       throw Exception('Failed to fetch data: $e');
