@@ -3,11 +3,18 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:smile_x_doctor_app/controller/clinic_controller.dart';
 import 'package:smile_x_doctor_app/utils/colors.dart';
 import 'package:smile_x_doctor_app/utils/const.dart';
 
 class HomeController extends GetxController {
   var currentIndex = 0.obs;
+
+  @override
+  void onInit() async {
+    super.onInit();
+    Get.lazyPut(() => ClinicController());
+  }
 
   Future<bool> showExitConfirmationDialog(BuildContext context) async {
     return await Get.dialog(

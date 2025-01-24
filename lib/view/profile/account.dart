@@ -12,9 +12,8 @@ class AccountScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final ProfileController controller = Get.put(ProfileController());
 
-    // Fetch profile data when the screen is loaded
-    controller
-        .fetchProfile('doctorId'); // Pass doctorId as per your requirement
+    // Load doctor details when the screen is initialized
+    controller.loadDoctorDetails();
 
     return Scaffold(
       appBar: AppBar(
@@ -42,6 +41,9 @@ class AccountScreen extends StatelessWidget {
                       color: AppColors.greyShade),
                 ),
                 onPressed: () {
+                  if (controller.isEditing.value) {
+                    controller.saveProfile(); // Save profile changes
+                  }
                   controller.isEditing.value = !controller.isEditing.value;
                 },
               ),
@@ -69,7 +71,6 @@ class AccountScreen extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 16),
-            // The email field is always read-only (fixed value)
             _buildTextField(
               controller: controller.emailController,
               label: 'Email',
@@ -90,7 +91,7 @@ class AccountScreen extends StatelessWidget {
       style: GoogleFonts.poppins(
           fontSize: screenHeight * 0.017,
           fontWeight: FontWeight.w500,
-          color: AppColors.greyShade),
+          color: AppColors.black),
       controller: controller,
       decoration: InputDecoration(
         hintText: label,

@@ -1,7 +1,8 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:smile_x_doctor_app/controller/appointment_list.dart';
+import 'package:smile_x_doctor_app/controller/clinic_controller.dart';
 import 'package:smile_x_doctor_app/utils/apputili.dart';
 import 'package:smile_x_doctor_app/utils/routes/app_routes.dart';
 import '../../utils/colors.dart';
@@ -101,17 +102,19 @@ class LoginScreen extends StatelessWidget {
                   ),
 
                   kHeight(0.005),
-                  Apputili().customButton(
-                    onPressed: () {
-                      loginController.login();
-                    },
-                    text: loginController.isLoading.value
-                        ? '' // No text when loading
-                        : 'Login', // Button text when not loading
-                    child: loginController.isLoading.value
-                        ? const CupertinoActivityIndicator() // Show activity indicator
-                        : null, // No child when not loading
-                  ),
+                  Obx(() {
+                    return Apputili().customButton(
+                      onPressed: () async {
+                        await loginController.login();
+                        final controller = Get.put(ClinicController());
+                        await controller.fetchClinics();
+                        final appointment = Get.put(AppointmentsController());
+                        await appointment.fetchAppointments();
+                      },
+                      text: 'Login',
+                      isLoading: loginController.isLoading.value,
+                    );
+                  }),
 
                   kHeight(0.01),
 

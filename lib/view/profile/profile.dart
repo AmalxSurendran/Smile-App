@@ -1,15 +1,14 @@
-// ignore_for_file: deprecated_member_use
+// ignore_for_file: deprecated_member_use, non_constant_identifier_names
 
-import 'dart:developer';
-
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:smile_x_doctor_app/controller/authentication/login_controller.dart';
 import 'package:smile_x_doctor_app/controller/profile_controller.dart';
 import 'package:smile_x_doctor_app/utils/colors.dart';
 import 'package:smile_x_doctor_app/utils/const.dart';
 import 'package:smile_x_doctor_app/utils/routes/app_routes.dart';
+import 'package:smile_x_doctor_app/utils/shared_preference.dart';
 
 class Profile extends StatelessWidget {
   const Profile({super.key});
@@ -17,7 +16,7 @@ class Profile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final controller = Get.put(ProfileController());
-
+    final doctorDetails = SharedPreferencesService.loadDoctorDetails();
     return Scaffold(
       appBar: AppBar(
         title: Text(
@@ -27,74 +26,42 @@ class Profile extends StatelessWidget {
             fontWeight: FontWeight.w600,
           ),
         ),
-        actions: [
-          Padding(
-            padding: const EdgeInsets.only(right: 24.0),
-            child: Obx(() {
-              if (controller.doctorDetailsList.isEmpty) {
-                return const Center(child: CupertinoActivityIndicator());
-              }
-
-              return controller.doctorDetailsList.length > 3
-                  ? Text(
-                      controller.doctorDetailsList[3],
-                      style: GoogleFonts.poppins(
-                        fontSize: screenHeight * 0.02,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    )
-                  : const SizedBox(); // Fallback when data is not available yet
-            }),
-          ),
-        ],
       ),
       body: SingleChildScrollView(
         child: Column(
           children: [
             kHeight(0.05),
-            Obx(
-              () => CircleAvatar(
-                radius: screenWidth * 0.20,
-                backgroundColor: Colors.blue,
-                child: Text(
-                  controller.doctorInitials.value,
-                  style: GoogleFonts.poppins(
-                      fontSize: screenHeight * 0.045,
-                      fontWeight: FontWeight.w600,
-                      color: Colors.white),
-                ),
+            CircleAvatar(
+              radius: screenWidth * 0.20,
+              backgroundColor: Colors.blue,
+              child: Text(
+                controller.extractInitials(doctorDetails?['name'] ?? 'XX'),
+                style: GoogleFonts.poppins(
+                    fontSize: screenHeight * 0.045,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.white),
               ),
             ),
-
             kHeight(0.03),
-            // Use Obx to update UI when doctorDetailsList changes
-            Obx(() {
-              log('profile screen doctorDetailsList: ${controller.doctorDetailsList}');
-              // If the list is empty, show a loading indicator
-              if (controller.doctorDetailsList.isEmpty) {
-                return const Center(child: CupertinoActivityIndicator());
-              } else {
-                // Display the fetched doctor details
-                return Column(
-                  children: [
-                    Text(
-                      "Dr. ${controller.doctorDetailsList[0]}", // Name
-                      style: GoogleFonts.poppins(
-                        fontSize: 22,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                    Text(
-                      controller.doctorDetailsList[1], // Email
-                      style: GoogleFonts.poppins(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w400,
-                      ),
-                    ),
-                  ],
-                );
-              }
-            }),
+            Column(
+              children: [
+                Text(
+                  "Dr. ${doctorDetails?['name']}", // Name
+                  style: GoogleFonts.poppins(
+                    fontSize: 22,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                Text(
+                  "${doctorDetails?['email']}", // Email
+                  style: GoogleFonts.poppins(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w400,
+                  ),
+                ),
+                // Additional doctor details if needed
+              ],
+            ),
             kHeight(0.025),
             Container(
               padding: const EdgeInsets.all(20),
@@ -105,13 +72,6 @@ class Profile extends StatelessWidget {
                     title: 'Account',
                     onTap: () {
                       Get.toNamed(AppRoutes.account);
-                    },
-                  ),
-                  _buildProfileOption(
-                    icon: Icons.local_hospital,
-                    title: 'Create Clinic',
-                    onTap: () {
-                      Get.toNamed(AppRoutes.AddClinic);
                     },
                   ),
                   _buildProfileOption(
@@ -160,7 +120,9 @@ class Profile extends StatelessWidget {
                                   borderRadius: BorderRadius.circular(8),
                                 ),
                                 child: TextButton(
-                                  onPressed: () => Get.back(),
+                                  onPressed: () {
+                                    Get.back();
+                                  },
                                   child: Text(
                                     'No',
                                     style: GoogleFonts.poppins(
@@ -177,7 +139,11 @@ class Profile extends StatelessWidget {
                                   borderRadius: BorderRadius.circular(8),
                                 ),
                                 child: TextButton(
-                                  onPressed: () => Get.offNamed("/login"),
+                                  onPressed: () {
+                                    final Logincontroller =
+                                        Get.put(LoginController());
+                                    Logincontroller.logout();
+                                  },
                                   child: Text(
                                     'Yes',
                                     style: GoogleFonts.poppins(
@@ -224,3 +190,6 @@ class Profile extends StatelessWidget {
     );
   }
 }
+
+// final doctorDetails = SharedPreferencesService.loadDoctorDetails();
+// var name = doctorDetails?['name'];

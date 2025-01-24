@@ -1,3 +1,5 @@
+// ignore_for_file: avoid_types_as_parameter_names, non_constant_identifier_names
+
 import 'dart:developer';
 import 'package:dio/dio.dart';
 
@@ -11,19 +13,36 @@ class DioHandler {
 //post method
   static Future<dynamic> dioPOST({
     required String endpoint,
-    required dynamic body,
+    dynamic body, // Optional body
+    Map<String, dynamic>? params, // Optional params
+    Options,
   }) async {
     Map<String, dynamic> headers = {
       "content-type": "application/json",
     };
     dio.options.headers.addAll(headers);
+
     try {
-      Response response = await dio
-          .post(
-            "$baseUrl2$endpoint",
-            data: body,
-          )
-          .timeout(const Duration(seconds: 60));
+      // Construct the final URL with query parameters if provided
+      final uri =
+          Uri.parse("$baseUrl2$endpoint").replace(queryParameters: params);
+
+      // Make POST request with or without body
+      Response response;
+      if (body != null) {
+        response = await dio
+            .post(
+              uri.toString(),
+              data: body,
+            )
+            .timeout(const Duration(seconds: 60));
+      } else {
+        response = await dio
+            .post(
+              uri.toString(),
+            )
+            .timeout(const Duration(seconds: 60));
+      }
 
       return response.data;
     } on DioException catch (e) {

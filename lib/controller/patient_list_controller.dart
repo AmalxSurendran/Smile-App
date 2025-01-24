@@ -1,34 +1,30 @@
-import 'dart:developer';
+// ignore_for_file: invalid_use_of_protected_member
 
+import 'dart:developer';
 import 'package:dio/dio.dart';
 import 'package:get/get.dart';
-import 'package:smile_x_doctor_app/utils/dio_handler.dart'; // Import DioHandler class
+import 'package:smile_x_doctor_app/utils/dio_handler.dart';
 
 class PatientsListController extends GetxController {
-  // Reactive list to store patient data as Map<String, dynamic>
   var patients = <Map<String, dynamic>>[].obs;
-
-  // Reactive variable to store clinicId
-  var selectedClinicId = ''.obs;
+  var clinicIdFromLogin = ''.obs;
+  var isLoading = false.obs;
 
   // Method to fetch patients
   Future<void> fetchPatients(String clinicId) async {
-    print('Fetching patients for clinic ID: $clinicId');
     try {
-      // Clear previous patients list before fetching new data
+      isLoading.value = true;
       patients.clear();
 
       log('Fetching patients for clinic ID: $clinicId');
       final data = await DioHandler.dioGET(endpoint: 'patients/pbc/$clinicId');
 
-      // Log the response data for debugging
-      log('Fetched data: $data');
-
-      if (data != null && data['patients'] is List) {
-        log('Patients data fetched: ${data['patients']}');
+      if (data != null &&
+          data['patients'] is List &&
+          data['patients'].isNotEmpty) {
+        // log('Patients data fetched: ${data['patients']}');
         patients.value = List<Map<String, dynamic>>.from(
           data['patients'].map((patient) {
-            log('Processing patient: $patient');
             return {
               'id': patient['id'],
               'patient_id': patient['patient_id'],
@@ -39,25 +35,36 @@ class PatientsListController extends GetxController {
             };
           }),
         );
-        log('Processed patients: ${patients.value}');
       } else {
         log('No patients found for clinic ID: $clinicId');
+        patients.clear();
       }
     } on DioException catch (e) {
       if (e.response?.statusCode == 404) {
         log("No patients found for clinic ID: $clinicId");
-        // Handle no data scenario (e.g., show a message to the user)
+        patients.clear();
       } else {
         log('DioException: ${e.message}');
       }
     } catch (e) {
       log('Error fetching patients: $e');
+    } finally {
+      // Set isLoading to false when data fetching ends
+      isLoading.value = false;
     }
   }
 
   // Method to handle clinic change
   void onClinicChanged(String clinicId) {
-    selectedClinicId.value = clinicId;
+    clinicIdFromLogin.value = clinicId;
     fetchPatients(clinicId); // Fetch patients when clinic is changed
+  }
+
+  // Method to clear the data when logging out
+  void clearPatientsData() {
+    patients.clear(); // Clear the list of patients
+    clinicIdFromLogin.value = ''; // Clear the clinicId
+    isLoading.value = false; // Reset loading state
+    log('Patients data cleared on logout');
   }
 }

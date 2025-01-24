@@ -94,12 +94,15 @@ class SignupScreen extends StatelessWidget {
                         ),
                       ),
                       kHeight(0.04),
-                      Apputili().customButton(
-                        onPressed: () {
-                          controller.signUp();
-                        },
-                        text: 'Sign Up', // Optional text
-                      ),
+                      Obx(() {
+                        return Apputili().customButton(
+                          onPressed: () async {
+                            await controller.signUp();
+                          },
+                          text: 'Signup',
+                          isLoading: controller.isLoading.value,
+                        );
+                      }),
                       kHeight(0.01),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.center,

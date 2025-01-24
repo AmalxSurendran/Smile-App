@@ -1,10 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:smile_x_doctor_app/controller/appointment_list.dart';
+import 'package:smile_x_doctor_app/controller/clinic_controller.dart';
 import 'package:smile_x_doctor_app/utils/routes/app_pages.dart';
 import 'package:smile_x_doctor_app/utils/colors.dart';
+import 'package:smile_x_doctor_app/utils/shared_preference.dart';
 
-void main() {
+void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await SharedPreferencesService.initialize();
+  Get.put(ClinicController());
+  Get.put(AppointmentsController());
   runApp(const MyApp());
 }
 

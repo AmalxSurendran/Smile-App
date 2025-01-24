@@ -1,24 +1,20 @@
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:smile_x_doctor_app/controller/clinic_add_controller.dart';
 import 'package:smile_x_doctor_app/utils/apputili.dart';
 import 'package:smile_x_doctor_app/utils/colors.dart';
 import 'package:smile_x_doctor_app/utils/const.dart';
-import 'package:smile_x_doctor_app/utils/shared_preference.dart';
 
-class AddClinic extends StatelessWidget {
-  const AddClinic({super.key});
+class AddAppointment extends StatelessWidget {
+  const AddAppointment({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final controller = Get.put(ClinicAddController());
     GlobalKey<FormState> formKey = GlobalKey<FormState>();
-    final doctorDetails = SharedPreferencesService.loadDoctorDetails();
+
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          'Add Clinic',
+          'Add Appointment',
           style: GoogleFonts.poppins(
             fontSize: screenHeight * 0.027,
             fontWeight: FontWeight.w600,
@@ -37,7 +33,7 @@ class AddClinic extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Name',
+                  'Patient Name',
                   style: GoogleFonts.poppins(
                     textStyle: Theme.of(context).textTheme.bodyLarge?.copyWith(
                           fontSize: screenHeight * 0.02,
@@ -48,12 +44,11 @@ class AddClinic extends StatelessWidget {
                 ),
                 kHeight(0.01),
                 Apputili().buildTextField(
-                  hintText: 'Enter clinic name',
-                  controller: controller.Cnamecontroller,
+                  hintText: 'Enter Patient name',
                 ),
                 kHeight(0.02),
                 Text(
-                  'Contact Number',
+                  'Patient Number',
                   style: GoogleFonts.poppins(
                     textStyle: Theme.of(context).textTheme.bodyLarge?.copyWith(
                           fontSize: screenHeight * 0.02,
@@ -64,12 +59,11 @@ class AddClinic extends StatelessWidget {
                 ),
                 kHeight(0.01),
                 Apputili().buildTextField(
-                  hintText: 'Enter clinic contact number',
-                  controller: controller.Cnumbercontroller,
+                  hintText: 'Enter Patient contact number',
                 ),
                 kHeight(0.02),
                 Text(
-                  'Email Address',
+                  'Patient Email Address',
                   style: GoogleFonts.poppins(
                     textStyle: Theme.of(context).textTheme.bodyLarge?.copyWith(
                           fontSize: screenHeight * 0.02,
@@ -80,12 +74,11 @@ class AddClinic extends StatelessWidget {
                 ),
                 kHeight(0.01),
                 Apputili().buildTextField(
-                  hintText: 'Enter clinic Email Address',
-                  controller: controller.Cemailcontroller,
+                  hintText: 'Enter Patient Email Address',
                 ),
                 kHeight(0.02),
                 Text(
-                  'Address',
+                  'Patient Address',
                   style: GoogleFonts.poppins(
                     textStyle: Theme.of(context).textTheme.bodyLarge?.copyWith(
                           fontSize: screenHeight * 0.02,
@@ -106,24 +99,20 @@ class AddClinic extends StatelessWidget {
                     vertical: screenHeight * 0.01,
                   ),
                   child: Apputili().buildTextField(
-                    hintText: 'Enter clinic address',
-                    controller: controller.Caddresscontroller,
+                    hintText: 'Enter Patient address',
                   ),
                 ),
                 kHeight(0.04),
-                Obx(() {
-                  return Apputili().customButton(
-                    onPressed: () async {
-                      if (formKey.currentState?.validate() ?? false) {
-                        await controller.createClinic(doctorDetails?['id']);
-                      } else {
-                        // Show a message if form is invalid
-                      }
-                    },
-                    text: 'Login',
-                    isLoading: controller.isLoading.value,
-                  );
-                }),
+                Apputili().customButton(
+                  onPressed: () async {
+                    if (formKey.currentState?.validate() ?? false) {
+                    } else {
+                      // Show a message if form is invalid
+                    }
+                  },
+                  text: 'Save',
+                  // isLoading: controller.isLoading.value,
+                ),
               ],
             ),
           ),

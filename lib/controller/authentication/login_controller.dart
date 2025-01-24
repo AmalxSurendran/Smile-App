@@ -1,11 +1,12 @@
-// ignore_for_file: invalid_use_of_protected_member
-
 import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:smile_x_doctor_app/controller/appointment_list.dart';
 import 'package:smile_x_doctor_app/controller/clinic_controller.dart';
-import 'package:smile_x_doctor_app/controller/profile_controller.dart';
+import 'package:smile_x_doctor_app/controller/patient_add_controller.dart';
+import 'package:smile_x_doctor_app/controller/patient_list_controller.dart';
 import 'package:smile_x_doctor_app/utils/dio_handler.dart';
+import 'package:smile_x_doctor_app/utils/shared_preference.dart';
 import '../../utils/routes/app_routes.dart';
 
 class LoginController extends GetxController {
@@ -35,21 +36,87 @@ class LoginController extends GetxController {
     isRememberMe.value = newValue ?? false;
   }
 
-  // Navigation to home
-  void navigationToHome() {
-    if (doctorDetailsList.isNotEmpty) {
-      final cController = Get.put(ClinicController());
-      cController.fetchclinc(doctorDetailsList[0]);
-      log("clicnic doctor id: ${doctorDetailsList[0]}");
-      final pcontroller = Get.put(ProfileController());
-      pcontroller.fetchProfile(doctorDetailsList[0]);
+  @override
+  void onInit() {
+    super.onInit();
+    _checkAutoLogin();
+  }
 
-      Get.offNamed(
-        AppRoutes.home,
-        arguments: doctorDetailsList.value,
-      );
+  void _checkAutoLogin() async {
+    // Load doctor details from SharedPreferences
+    var doctorDetails = SharedPreferencesService.loadDoctorDetails();
+    var doctorId = SharedPreferencesService.loadDoctorId();
+
+    if (doctorDetails != null && doctorId != null) {
+      // Auto login: doctor is already logged in
+      doctorname.value = doctorDetails['name'] ?? 'Unknown Doctor';
+      doctorDetailsList.value = [
+        doctorDetails['id'] ?? '',
+        doctorDetails['doctor_id'] ?? '',
+        doctorDetails['name'] ?? '',
+        doctorDetails['email'] ?? '',
+        doctorDetails['mobile'] ?? '',
+      ];
+      doctorId = doctorDetails['id'] ?? '';
+
+      // Navigate to the home screen
+      navigationToHome();
     } else {
-      // Handle the case when doctorDetailsList is empty
+      // Navigate to login screen if not logged in
+      Get.toNamed(AppRoutes.login);
+    }
+  }
+
+  // Navigation to home
+  // void navigationToHome() {
+  //   // Retrieve doctor ID from SharedPreferences
+  //   final String? storedDoctorId = SharedPreferencesService.loadDoctorId();
+
+  //   if (storedDoctorId != null && storedDoctorId.isNotEmpty) {
+  //     // Doctor ID is available, proceed to home screen
+  //     final cController = Get.put(ClinicController());
+  //     cController.setDoctorId(storedDoctorId);
+  //     // cController.fetchClinics(
+  //     //     storedDoctorId); // Pass the stored doctor ID for clinic info
+  //     log("Clinic doctor id: $storedDoctorId");
+
+  //     final acontroller = Get.put(AppointmentsController());
+  //     acontroller.setDoctorId(
+  //         storedDoctorId); // Pass the stored doctor ID for appointments
+
+  //     // Pass doctor ID as a List<String>
+  //     Get.offNamed(
+  //       AppRoutes.home,
+  //       arguments:
+  //           doctorDetailsList, // Ensure this is a List<String> with valid data
+  //     );
+  //   } else {
+  //     // Handle the case when doctor ID is missing or invalid
+  //     Get.snackbar(
+  //       "Error",
+  //       "Doctor details are missing.",
+  //       backgroundColor: Colors.red,
+  //       colorText: Colors.white,
+  //     );
+  //   }
+
+  //   // Clear text fields after successful login
+
+  // }
+  void navigationToHome() {
+    final String? storedDoctorId = SharedPreferencesService.loadDoctorId();
+
+    if (storedDoctorId != null && storedDoctorId.isNotEmpty) {
+      final clinicController = Get.put(ClinicController());
+      clinicController.setDoctorId(storedDoctorId);
+      clinicController.selectedClinic.value = null;
+
+      final acontroller = Get.put(AppointmentsController());
+      acontroller.setDoctorId(storedDoctorId);
+
+      // Navigate to the home screen
+      Get.offNamed(AppRoutes.home);
+    } else {
       Get.snackbar(
         "Error",
         "Doctor details are missing.",
@@ -62,7 +129,8 @@ class LoginController extends GetxController {
   }
 
   Future<void> login() async {
-    isLoading.value = true;
+    isLoading.value = true; // Start loading when login is triggered
+
     const String loginEndpoint = "login";
     final body = {
       "username": emailcontroller.text,
@@ -75,30 +143,47 @@ class LoginController extends GetxController {
         body: body,
       );
 
-      isLoading.value = false;
+      isLoading.value = false; // Stop loading after receiving the response
 
+      // Check if response is valid and of type Map
       if (response != null && response is Map) {
+        // Check if login is successful
         if (response['message'] == "Login successful") {
           final doctor = response['doctor'];
 
-          // Check if doctor data is valid
           if (doctor != null) {
-            doctorname.value = doctor['name'] ?? '';
+            doctorname.value = doctor['name'] ?? 'Unknown Doctor';
+
+            // Save doctor details to SharedPreferences
+            await SharedPreferencesService.saveDoctorDetails({
+              'id': doctor['id']?.toString() ?? '',
+              'doctor_id': doctor['doctor_id']?.toString() ?? '',
+              'name': doctor['name'] ?? 'Unknown',
+              'email': doctor['email'] ?? 'No Email',
+              'mobile': doctor['mobile'] ?? 'No Mobile',
+            });
+
+            // Save doctor ID to SharedPreferences
+            await SharedPreferencesService.saveDoctorId(
+                doctor['id']?.toString() ?? '');
+
+            // Save the doctor details in a list (if needed)
             doctorDetailsList.value = [
-              doctor['doctor_id'] ?? '',
-              doctor['name'] ?? '',
-              doctor['email'] ?? '',
-              doctor['mobile'] ?? '',
+              doctor['id']?.toString() ?? '',
+              doctor['doctor_id']?.toString() ?? '',
+              doctor['name'] ?? 'Unknown',
+              doctor['email'] ?? 'No Email',
+              doctor['mobile'] ?? 'No Mobile',
             ];
-            update();
-            doctorId.value = doctor['doctor_id'] ?? '';
 
-            log('doctorDetailsList: $doctorDetailsList');
-            log("Doctor ID: ${doctorId.value}");
+            doctorId.value =
+                doctor['id']?.toString() ?? ''; // Ensure doctorId is a string
 
-            // Ensure doctor details are set before navigating
-            // Delay to ensure state updates
+            update(); // Update the UI after setting the doctor details
+
+            // Now that the doctor details are saved, navigate to the home screen
             navigationToHome();
+
             log("Login successful: $response");
           } else {
             // Handle case where doctor data is missing or invalid
@@ -110,6 +195,7 @@ class LoginController extends GetxController {
             );
           }
         } else {
+          // Show login error message if credentials are invalid
           final errorMessage = response['message'] ?? "Invalid credentials";
           Get.snackbar(
             "Login Failed",
@@ -118,10 +204,19 @@ class LoginController extends GetxController {
             colorText: Colors.white,
           );
         }
+      } else {
+        // Handle case when the response is not valid or null
+        Get.snackbar(
+          "Error",
+          "An unexpected error occurred. Please try again.",
+          backgroundColor: Colors.red,
+          colorText: Colors.white,
+          duration: const Duration(seconds: 3),
+        );
       }
     } catch (e) {
-      // Error handling for unexpected issues
-      isLoading.value = false;
+      // Catch any exceptions during the login request
+      isLoading.value = false; // Stop loading on error
 
       Get.snackbar(
         "Error",
@@ -132,5 +227,37 @@ class LoginController extends GetxController {
       );
       log("Login exception: $e");
     }
+    emailcontroller.clear();
+    passwordcontroller.clear();
+  }
+
+  void logout() async {
+    // Clear all SharedPreferences data
+    await SharedPreferencesService.clearSharedPreferences();
+
+    final patient = Get.put(PatientsListController());
+    patient.clearPatientsData();
+
+    final appointment = Get.put(AppointmentsController());
+    appointment.clearAppointments();
+    // Clear the ClinicController state
+    final clinicController = Get.put(ClinicController());
+    clinicController.clearclinic(); // This will reset the clinic values
+
+    // Explicitly reset selected clinic and selected clinic ID
+    clinicController.selectedClinic.value = null;
+    clinicController.selectedClinicId.value = null;
+
+    // Reset the PatientAddController's clinicIdFromLogin
+    final patientAddController = Get.put(PatientAddController());
+    patientAddController.resetClinicId(); // Reset clinic ID here
+
+    // Clear doctor details and reset reactive variables
+    doctorname.value = '';
+    doctorDetailsList.value = [];
+    doctorId.value = '';
+
+    // Navigate to the login screen
+    Get.toNamed(AppRoutes.splash);
   }
 }

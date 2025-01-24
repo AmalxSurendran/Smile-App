@@ -29,6 +29,12 @@ class SignupController extends GetxController {
 
   //Navigation to home
   void navigationToHome() {
+    namecontroller.clear();
+    emailcontroller.clear();
+    phonecontroller.clear();
+    usernamecontroller.clear();
+    passwordcontroller.clear();
+
     Get.toNamed(AppRoutes.login);
   }
 
@@ -71,14 +77,14 @@ class SignupController extends GetxController {
           duration: const Duration(seconds: 3),
         );
 
-        navigationToHome(); // Navigate to the home screen or appropriate screen
-        log("Sign-Up successful: $response");
+        navigationToHome();
+        log("Signup successful: $response");
       } else {
         final errorMessage = response is Map && response['message'] != null
             ? response['message']
             : "Failed to create account. Please try again.";
         Get.snackbar(
-          "Sign-Up Failed",
+          "Signup Failed",
           errorMessage,
           backgroundColor: Colors.red,
           colorText: Colors.white,
